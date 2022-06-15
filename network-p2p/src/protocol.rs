@@ -67,6 +67,7 @@ pub enum CustomMessageOutcome {
         info: Box<ChainInfo>,
         notif_protocols: Vec<Cow<'static, str>>,
         rpc_protocols: Vec<Cow<'static, str>>,
+        remote_node_name: Option<String>,
     },
     /// The [`NotificationsSink`] of some notification protocols need an update.
     NotificationStreamReplaced {
@@ -130,6 +131,7 @@ pub struct Protocol {
     /// Entries are removed when the corresponding "substream closed" is later received.
     bad_handshake_substreams: HashSet<(PeerId, sc_peerset::SetId)>,
     chain_info: ChainInfo,
+    node_name: String,
 }
 
 impl NetworkBehaviour for Protocol {
@@ -350,6 +352,7 @@ impl Protocol {
         boot_node_ids: Arc<HashSet<PeerId>>,
         notif_protocols: Vec<Cow<'static, str>>,
         rpc_protocols: Vec<Cow<'static, str>>,
+        node_name: String,
     ) -> errors::Result<(Protocol, sc_peerset::PeersetHandle)> {
         let mut important_peers = HashSet::new();
         important_peers.extend(boot_node_ids.iter());
@@ -365,6 +368,7 @@ impl Protocol {
                 notif_protocols.to_vec(),
                 rpc_protocols.to_vec(),
                 chain_info.clone(),
+                &node_name,
             );
 
             let notif_protocol_wth_handshake = notif_protocols
@@ -393,6 +397,7 @@ impl Protocol {
             boot_node_ids,
             notif_protocols,
             rpc_protocols,
+            node_name,
             bad_handshake_substreams: Default::default(),
         };
         Ok((protocol, peerset_handle))
@@ -508,6 +513,7 @@ impl Protocol {
             info: Box::new(status.info),
             notif_protocols: status.notif_protocols.to_vec(),
             rpc_protocols: status.rpc_protocols.to_vec(),
+            remote_node_name: status.node_name,
         }
     }
 
@@ -515,6 +521,7 @@ impl Protocol {
         notif_protocols: Vec<Cow<'static, str>>,
         rpc_protocols: Vec<Cow<'static, str>>,
         info: ChainInfo,
+        node_name: &str,
     ) -> Status {
         message::generic::Status {
             version: CURRENT_VERSION,
@@ -522,6 +529,7 @@ impl Protocol {
             notif_protocols,
             rpc_protocols,
             info,
+            node_name: Some(node_name.to_owned()),
         }
     }
 
@@ -529,8 +537,9 @@ impl Protocol {
         notif_protocols: Vec<Cow<'static, str>>,
         rpc_protocols: Vec<Cow<'static, str>>,
         info: ChainInfo,
+        node_name: &str,
     ) -> Vec<u8> {
-        Self::build_status(notif_protocols, rpc_protocols, info)
+        Self::build_status(notif_protocols, rpc_protocols, info, node_name)
             .encode()
             .expect("Status encode should success.")
     }
@@ -587,6 +596,7 @@ impl Protocol {
             self.notif_protocols.to_vec(),
             self.rpc_protocols.to_vec(),
             self.chain_info.clone(),
+            &self.node_name,
         );
         for (set_id, _) in self.notif_protocols.iter().enumerate() {
             self.behaviour

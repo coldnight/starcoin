@@ -84,6 +84,7 @@ pub fn build_network_worker(
             .iter()
             .map(|config| config.name.clone())
             .collect(),
+        network_config.node_name.clone(),
     );
     let config = NetworkConfiguration {
         listen_addresses: vec![network_config.listen()],

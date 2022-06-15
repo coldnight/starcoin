@@ -58,6 +58,7 @@ pub enum Event {
         info: Box<ChainInfo>,
         notif_protocols: Vec<Cow<'static, str>>,
         rpc_protocols: Vec<Cow<'static, str>>,
+        remote_node_name: Option<String>,
     },
 
     /// Closed a substream with the given node. Always matches a corresponding previous

@@ -537,7 +537,7 @@ fn test_support_protocol() {
 
     let config2 = generate_config(vec![seed], vec![block_v1.into()], vec![]);
 
-    let worker2 = NetworkWorker::new(Params::new(config2, protocol, chain1, None)).unwrap();
+    let worker2 = NetworkWorker::new(Params::new(config2.clone(), protocol, chain1, None)).unwrap();
     let service2 = worker2.service().clone();
     let stream2 = service2.event_stream("test1");
     task::spawn(worker2);
@@ -570,11 +570,13 @@ fn test_support_protocol() {
         info: _,
         notif_protocols,
         rpc_protocols,
+        remote_node_name,
     } = open_event1
     {
         assert_eq!(&remote, service2.peer_id());
         assert_eq!(notif_protocols.len(), 1);
         assert_eq!(rpc_protocols.len(), 0);
+        assert_eq!(remote_node_name, Some(config2.node_name.clone()));
     } else {
         panic!("Unexpected event type: {:?}", open_event1)
     }
@@ -594,11 +596,13 @@ fn test_support_protocol() {
         info: _,
         notif_protocols,
         rpc_protocols,
+        remote_node_name,
     } = open_event2
     {
         assert_eq!(&remote, service1.peer_id());
         assert_eq!(notif_protocols.len(), 2);
         assert_eq!(rpc_protocols.len(), 1);
+        assert_eq!(remote_node_name, Some(config1.node_name.clone()));
     } else {
         panic!("Unexpected event type: {:?}", open_event2)
     }

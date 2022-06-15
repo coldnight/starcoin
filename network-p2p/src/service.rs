@@ -226,6 +226,7 @@ impl NetworkWorker {
                 .iter()
                 .map(|config| config.name.clone())
                 .collect(),
+            params.network_config.node_name.clone(),
         )?;
 
         // Build the swarm.
@@ -1219,6 +1220,7 @@ impl Future for NetworkWorker {
                     info,
                     notif_protocols,
                     rpc_protocols,
+                    remote_node_name,
                 })) => {
                     if let Some(metrics) = this.metrics.as_ref() {
                         metrics.notifications_streams_opened_total.inc();
@@ -1234,6 +1236,7 @@ impl Future for NetworkWorker {
                         info,
                         notif_protocols,
                         rpc_protocols,
+                        remote_node_name,
                     });
                 }
                 Poll::Ready(SwarmEvent::Behaviour(BehaviourOut::NotificationStreamReplaced {

@@ -25,5 +25,10 @@ pub mod generic {
         pub rpc_protocols: Vec<Cow<'static, str>>,
         /// The info of the chain
         pub info: ChainInfo,
+
+        /// The name of node that defined in config.
+        ///
+        /// **Note**: Wrapped by Option for compatible purpose, this field may absent in old version nodes.
+        pub node_name: Option<String>,
     }
 }

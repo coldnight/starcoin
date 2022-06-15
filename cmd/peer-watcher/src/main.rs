@@ -28,11 +28,13 @@ fn main() {
                         info,
                         notif_protocols,
                         rpc_protocols,
+                        remote_node_name,
                     } => Some(PeerInfo::new(
                         remote.into(),
                         *info,
                         notif_protocols,
                         rpc_protocols,
+                        remote_node_name,
                     )),
                     _ => None,
                 }
